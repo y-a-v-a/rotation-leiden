@@ -1,0 +1,52 @@
+<script>
+    function getRedDotCoordinates(canvasSize) {
+    const results = [];
+
+    const Xc = canvasSize / 2; // X-coordinate of the center of the canvas/large circle
+    const Yc = canvasSize / 2; // Y-coordinate of the center of the canvas/large circle
+
+    // Radius of the large outer circle
+    const R_L = canvasSize / 2;
+
+    // Radius of each of the four small inner circles
+    // R_L = r_sc * (1 + sqrt(2))  => r_sc = R_L / (1 + sqrt(2))
+    // Multiplying by (sqrt(2)-1)/(sqrt(2)-1) gives r_sc = R_L * (sqrt(2)-1)
+    const r_sc = R_L * (Math.sqrt(2) - 1);
+
+    // Define the centers of the four small inner circles.
+    // The offset from (Xc, Yc) to these centers is r_sc itself.
+    const circleCenters = [
+        { x: Xc - r_sc, y: Yc - r_sc }, // Top-left circle center
+        { x: Xc + r_sc, y: Yc - r_sc }, // Top-right circle center
+        { x: Xc - r_sc, y: Yc + r_sc }, // Bottom-left circle center
+        { x: Xc + r_sc, y: Yc + r_sc }  // Bottom-right circle center
+    ];
+
+    for (const center of circleCenters) {
+        const c_ix = center.x;
+        const c_iy = center.y;
+
+        // Calculate the 4 red dots (vertices of the inscribed square) for the current inner circle.
+        // Order: Top, Left, Right, Bottom.
+        const points = [
+            [c_ix,           c_iy - r_sc], // Top vertex
+            [c_ix - r_sc,    c_iy],         // Left vertex
+            [c_ix + r_sc,    c_iy],         // Right vertex
+            [c_ix,           c_iy + r_sc]  // Bottom vertex
+        ];
+
+        // Add points to the results array
+        for (const point of points) {
+            results.push(point);
+        }
+    }
+
+    return results;
+}
+
+// Example usage:
+const canvasWidth = 100;
+const coordinates = getRedDotCoordinates(canvasWidth);
+console.log(coordinates);
+// This will output an array of 16 arrays, e.g., [[x1, y1], [x2, y2], ..., [x16, y16]]
+</script>
