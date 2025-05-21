@@ -11,14 +11,30 @@
         gap: 20px;
         margin: 20px;
       }
-      canvas {
-        border: 1px solid #ccc;
+      
+      @media (max-width: 480px) {
+        canvas {
+          transform: scale(0.9);
+          width: 90vw;
+          height: auto;
+          max-width: 400px;
+        }
+        
+        .canvas-container {
+          justify-content: center;
+          gap: 10px;
+          margin: 10px;
+        }
       }
     </style>
   </head>
   <body>
-    <h1>Rotation Leiden</h1>
-    <p>Visualization of Kenneth Martin's Rotation Frankfurt pattern</p>
+    <h1>Rotation 'Leiden'</h1>
+    <p>
+      Visualization of
+      <a href="https://www.tate.org.uk/art/artists/kenneth-martin-1585" target="_blank" rel="noopener noreferrer">Kenneth Martin's</a>
+      <em>Rotation 'Frankfurt'</em> pattern
+    </p>
 
     <div class="canvas-container">
       <canvas id="canvas0" width="400" height="400"></canvas>
@@ -26,6 +42,14 @@
       <canvas id="canvas2" width="400" height="400"></canvas>
       <canvas id="canvas3" width="400" height="400"></canvas>
     </div>
+
+    <p>Custom variants (first using different rotation in the key drawing, second a random render)</p>
+    <div class="canvas-container">
+      <canvas id="canvas4" width="400" height="400"></canvas>
+      <canvas id="canvas5" width="400" height="400"></canvas>
+    </div>
+
+    <p>Vincent Bruijn (c) 2025</p>
 
     <script>
       const lineDefinitions = [
@@ -54,48 +78,53 @@
       const colors = ['R', 'O', 'W', 'G', 'B', 'R', 'O', 'W', 'G', 'B', 'R', 'O', 'W', 'G', 'B'];
 
       function getRedDotCoordinates(canvasSize) {
-  const outerRadius = canvasSize / 2;
-  const innerRadius = outerRadius / 2;
-  const squareOffset = (innerRadius * Math.SQRT2) / 2;
+        const outerRadius = canvasSize / 2;
+        const innerRadius = outerRadius / 2;
+        const squareOffset = (innerRadius * Math.SQRT2) / 2;
 
-  const centers = [
-    [outerRadius - innerRadius, outerRadius - innerRadius], // (25, 25)
-    [outerRadius + innerRadius, outerRadius - innerRadius], // (75, 25)
-    [outerRadius - innerRadius, outerRadius + innerRadius], // (25, 75)
-    [outerRadius + innerRadius, outerRadius + innerRadius], // (75, 75)
-  ];
+        const centers = [
+          [outerRadius - innerRadius, outerRadius - innerRadius], // (25, 25)
+          [outerRadius + innerRadius, outerRadius - innerRadius], // (75, 25)
+          [outerRadius - innerRadius, outerRadius + innerRadius], // (25, 75)
+          [outerRadius + innerRadius, outerRadius + innerRadius], // (75, 75)
+        ];
 
-  const redDots = [];
+        const redDots = [];
 
-  // For each center, compute 4 corners of the square
-  for (const [cx, cy] of centers) {
-    redDots.push([cx - squareOffset, cy - squareOffset]); // top-left
-    redDots.push([cx + squareOffset, cy - squareOffset]); // top-right
-    redDots.push([cx - squareOffset, cy + squareOffset]); // bottom-left
-    redDots.push([cx + squareOffset, cy + squareOffset]); // bottom-right
-  }
+        // For each center, compute 4 corners of the square
+        for (const [cx, cy] of centers) {
+          redDots.push([cx - squareOffset, cy - squareOffset]); // top-left
+          redDots.push([cx + squareOffset, cy - squareOffset]); // top-right
+          redDots.push([cx - squareOffset, cy + squareOffset]); // bottom-left
+          redDots.push([cx + squareOffset, cy + squareOffset]); // bottom-right
+        }
 
-  // Sort by canvas coordinate system (top-left to bottom-right)
-  redDots.sort((a, b) => (a[1] - b[1]) || (a[0] - b[0]));
+        // Sort by canvas coordinate system (top-left to bottom-right)
+        redDots.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 
-  return redDots;
-}
-
+        return redDots;
+      }
 
       function applyMappings(coordinates) {
         // Define the mapping patterns
         const mapping0 = [1, 0, 4, 9, 14, 15, 11, 6, 2, 3, 7, 10, 13, 12, 8, 5];
         const mapping1 = [3, 2, 6, 4, 12, 13, 9, 11, 15, 14, 10, 8, 0, 1, 5, 7];
-        const mapping2 = [9, 8, 12, 14, 6, 7, 3, 1, 5, 4, 0, 2, 10, 11, 15, 13];
-        const mapping3 = [11, 10, 14, 3, 4, 5, 1, 12, 8, 9, 13, 0, 7, 6, 2, 15];
-        const mapping4 = [];
+        const mapping2 = [11, 10, 14, 3, 4, 5, 1, 12, 8, 9, 13, 0, 7, 6, 2, 15];
+        const mapping3 = [9, 8, 12, 14, 6, 7, 3, 1, 5, 4, 0, 2, 10, 11, 15, 13];
+        const mapping4 = [2, 6, 7, 5, 13, 9, 8, 10, 11, 15, 14, 12, 4, 0, 1, 3];
 
-        // Apply each mapping to create four new arrays
+        // Create a random mapping with unique numbers 0-15
+        const numbers = Array.from({ length: 16 }, (_, i) => i);
+        const mapping5 = numbers.sort(() => Math.random() - 0.5);
+
+        // Apply each mapping to create five new arrays
         const mappedArrays = [
           mapping0.map(index => coordinates[index]),
           mapping1.map(index => coordinates[index]),
           mapping2.map(index => coordinates[index]),
           mapping3.map(index => coordinates[index]),
+          mapping4.map(index => coordinates[index]),
+          mapping5.map(index => coordinates[index]),
         ];
 
         return mappedArrays;
@@ -104,6 +133,11 @@
       function drawLines(canvas, coordinates) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Fill background
+        ctx.fillStyle = '#f8f7f0';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         let offset = 0;
 
         // Draw each line according to lineDefinitions
@@ -116,27 +150,27 @@
           const color = colors[index];
           switch (color) {
             case 'R':
-              ctx.strokeStyle = '#FF0000cc';
+              ctx.strokeStyle = '#FF00FFcc';
               break;
             case 'O':
-              ctx.strokeStyle = '#FFA500cc';
+              ctx.strokeStyle = '#FFFF00cc';
               break;
             case 'W':
-              ctx.strokeStyle = '#ffffffcc';
+              ctx.strokeStyle = '#ffffffdf';
               break;
             case 'G':
-              ctx.strokeStyle = '#00FF00cc';
+              ctx.strokeStyle = '#000000cc';
               break;
             case 'B':
-              ctx.strokeStyle = '#0000FFcc';
+              ctx.strokeStyle = '#00FFFFcc';
               break;
           }
 
-          ctx.lineCap = "square";
+          ctx.lineCap = 'square';
           ctx.beginPath();
           ctx.lineWidth = 25;
-          ctx.moveTo(startPoint[0], startPoint[1] );
-          ctx.lineTo(endPoint[0], endPoint[1] );
+          ctx.moveTo(startPoint[0], startPoint[1]);
+          ctx.lineTo(endPoint[0], endPoint[1]);
           ctx.stroke();
         });
       }
@@ -148,7 +182,7 @@
       const mappedCoordinates = applyMappings(coordinates);
 
       // Draw each mapping on its respective canvas
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 6; i++) {
         const canvas = document.getElementById(`canvas${i}`);
         drawLines(canvas, mappedCoordinates[i]);
       }
